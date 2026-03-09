@@ -16,7 +16,7 @@ import type {
 
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
-  const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  const baseURL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   const client = axios.create({
     baseURL,
