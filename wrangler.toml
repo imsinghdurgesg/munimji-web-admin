@@ -1,0 +1,10 @@
+name = "munimji-admin"
+compatibility_date = "2024-01-01"
+
+pages_build_output_dir = "dist"
+
+[env.production]
+name = "munimji-admin"
+
+[env.production.vars]
+# Environment variables will be set in Cloudflare Pages dashboard
