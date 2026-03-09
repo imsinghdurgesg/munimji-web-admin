@@ -144,7 +144,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Take Photo (Camera) */}
             <label className="flex flex-col items-center justify-center h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
               <div className="flex flex-col items-center justify-center">
@@ -179,7 +179,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             SKU {!product && <span className="text-xs text-gray-500">(Auto-generated)</span>}
@@ -236,7 +236,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         disabled={isLoading}
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Select
           label="Category"
           value={formData.categoryId}
@@ -256,7 +256,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Input
           label="Cost Price"
           type="number"
@@ -287,7 +287,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Input
           label="Current Stock"
           type="number"
