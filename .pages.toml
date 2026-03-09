@@ -1,0 +1,9 @@
+# Cloudflare Pages Configuration
+# This file is optional but helps document the build configuration
+
+[build]
+command = "npm run build"
+destination = "dist"
+
+[build.environment]
+NODE_VERSION = "20"
