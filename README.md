@@ -6,10 +6,13 @@ Web-based admin portal for managing Munimji catalog, products, and inventory.
 
 - 🔐 Secure authentication with JWT
 - 📦 Product management with image upload
+- 📸 Camera capture support for mobile devices
+- 🏷️ Auto-generated SKU with manual override
+- 🖼️ Multi-size image processing
 - 🏪 Catalog settings and customization
 - 📊 Dashboard with stats
 - 🌐 Multi-shop support
-- 📱 Responsive design
+- 📱 Responsive mobile-first design
 
 ## Tech Stack
 
