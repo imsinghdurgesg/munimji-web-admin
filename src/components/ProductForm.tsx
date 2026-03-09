@@ -7,6 +7,7 @@ import { Input } from './Input';
 import { Textarea } from './Textarea';
 import { Select } from './Select';
 import { generateSKU } from '../utils/sku-generator';
+import { getImageUrl } from '../utils/image';
 import type { Product } from '../types';
 
 interface ProductFormProps {
@@ -19,7 +20,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const { categories, fetchCategories, createProduct, updateProduct } = useProductStore();
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    product?.imageUrl ? getImageUrl(product.imageUrl) || null : null
+  );
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isManualSKU, setIsManualSKU] = useState(!!product?.sku);
 
@@ -129,19 +132,44 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
         {imagePreview ? (
-          <div className="relative inline-block">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
-            />
-            <button
-              type="button"
-              onClick={removeImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          <div className="space-y-3">
+            <div className="relative inline-block">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
+              />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors text-sm font-medium">
+                <Camera className="w-4 h-4" />
+                Take New Photo
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImageChange}
+                />
+              </label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors text-sm font-medium">
+                <Upload className="w-4 h-4" />
+                Upload New
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </label>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

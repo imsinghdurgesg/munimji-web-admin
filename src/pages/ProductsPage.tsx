@@ -6,6 +6,7 @@ import { Input } from '../components/Input';
 import { Modal } from '../components/Modal';
 import { ProductForm } from '../components/ProductForm';
 import { CategoryList } from '../components/CategoryList';
+import { getImageUrl } from '../utils/image';
 import type { Product } from '../types';
 
 export default function ProductsPage() {
@@ -146,7 +147,7 @@ export default function ProductsPage() {
                             {product.imageUrl ? (
                               <img
                                 className="h-10 w-10 rounded object-cover"
-                                src={product.imageUrl}
+                                src={getImageUrl(product.imageUrl)}
                                 alt={product.name}
                               />
                             ) : (
@@ -220,7 +221,7 @@ export default function ProductsPage() {
                       {product.imageUrl ? (
                         <img
                           className="h-16 w-16 rounded object-cover"
-                          src={product.imageUrl}
+                          src={getImageUrl(product.imageUrl)}
                           alt={product.name}
                         />
                       ) : (
