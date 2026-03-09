@@ -104,12 +104,29 @@ export const authApi = {
  */
 export const shopApi = {
   getCurrent: async (): Promise<Shop> => {
-    const { data } = await apiClient.get<Shop>('/shops/current');
+    const shopId = getShopId();
+    const { data } = await apiClient.get<Shop>(`/shops/${shopId}`);
     return data;
   },
 
   update: async (shopId: string, updates: Partial<Shop>): Promise<Shop> => {
     const { data} = await apiClient.patch<Shop>(`/shops/${shopId}`, updates);
+    return data;
+  },
+
+  updateCatalogSettings: async (
+    shopId: string,
+    settings: {
+      catalogEnabled?: boolean;
+      catalogSlug?: string;
+      whatsappNumber?: string;
+      catalogTheme?: {
+        primaryColor?: string;
+        logo?: string;
+      };
+    }
+  ): Promise<Shop> => {
+    const { data } = await apiClient.patch<Shop>(`/shops/${shopId}/catalog/settings`, settings);
     return data;
   },
 };

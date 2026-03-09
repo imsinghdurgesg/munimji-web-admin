@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { shopApi } from '../services/api';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Save } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { shop } = useAuthStore();
+  const { shop, refreshShop } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: shop?.name || '',
@@ -28,14 +29,43 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!shop?.id) {
+      alert('Shop information not found. Please login again.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // TODO: Implement shop update API call
+      // Update shop name if changed
+      if (formData.name !== shop.name) {
+        await shopApi.update(shop.id, {
+          name: formData.name,
+        });
+      }
+
+      // Update catalog settings if changed
+      if (
+        formData.catalogEnabled !== shop.catalogEnabled ||
+        formData.catalogSlug !== shop.catalogSlug ||
+        formData.whatsappNumber !== shop.whatsappNumber
+      ) {
+        await shopApi.updateCatalogSettings(shop.id, {
+          catalogEnabled: formData.catalogEnabled,
+          catalogSlug: formData.catalogSlug,
+          whatsappNumber: formData.whatsappNumber,
+        });
+      }
+
+      // Refresh shop data in store
+      await refreshShop();
+
       alert('Settings saved successfully!');
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save settings';
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
