@@ -41,7 +41,6 @@ export interface Shop {
 }
 
 export interface LoginRequest {
-  shopId: string;
   username: string;
   password: string;
 }

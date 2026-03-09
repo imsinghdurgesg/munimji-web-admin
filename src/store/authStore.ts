@@ -79,6 +79,7 @@ export const useAuthStore = create<AuthState>()(
       refreshShop: async () => {
         try {
           const shop = await shopApi.getCurrent();
+          console.log('Fetched shop data:', shop);
           set({ shop });
         } catch (error) {
           console.error('Failed to refresh shop data:', error);

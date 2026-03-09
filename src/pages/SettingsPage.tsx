@@ -45,6 +45,7 @@ export default function SettingsPage() {
     try {
       // Update shop name if changed
       if (formData.name !== shop.name) {
+        console.log('Updating shop name:', formData.name);
         await shopApi.update(shop.id, {
           name: formData.name,
         });
@@ -56,6 +57,11 @@ export default function SettingsPage() {
         formData.catalogSlug !== shop.catalogSlug ||
         formData.whatsappNumber !== shop.whatsappNumber
       ) {
+        console.log('Updating catalog settings:', {
+          catalogEnabled: formData.catalogEnabled,
+          catalogSlug: formData.catalogSlug,
+          whatsappNumber: formData.whatsappNumber,
+        });
         await shopApi.updateCatalogSettings(shop.id, {
           catalogEnabled: formData.catalogEnabled,
           catalogSlug: formData.catalogSlug,
@@ -64,7 +70,9 @@ export default function SettingsPage() {
       }
 
       // Refresh shop data in store
+      console.log('Refreshing shop data...');
       await refreshShop();
+      console.log('Shop data refreshed');
 
       alert('Settings saved successfully!');
     } catch (error) {

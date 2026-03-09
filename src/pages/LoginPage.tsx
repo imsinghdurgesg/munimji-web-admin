@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, User, Lock, Building2 } from 'lucide-react';
+import { Store, User, Lock } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
@@ -10,7 +10,6 @@ export default function LoginPage() {
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const [formData, setFormData] = useState({
-    shopId: '',
     username: '',
     password: '',
   });
@@ -44,18 +43,6 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Shop ID */}
-          <Input
-            label="Shop ID"
-            type="text"
-            placeholder="Enter your shop ID"
-            value={formData.shopId}
-            onChange={(e) => setFormData({ ...formData, shopId: e.target.value })}
-            leftIcon={<Building2 className="w-5 h-5" />}
-            required
-            disabled={isLoading}
-          />
-
           {/* Username */}
           <Input
             label="Username"
@@ -66,6 +53,7 @@ export default function LoginPage() {
             leftIcon={<User className="w-5 h-5" />}
             required
             disabled={isLoading}
+            autoComplete="username"
           />
 
           {/* Password */}
