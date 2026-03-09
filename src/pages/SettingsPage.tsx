@@ -15,6 +15,11 @@ export default function SettingsPage() {
     catalogEnabled: shop?.catalogEnabled ?? false,
   });
 
+  // Fetch shop data on component mount
+  useEffect(() => {
+    refreshShop();
+  }, [refreshShop]);
+
   // Update form data when shop data loads
   useEffect(() => {
     if (shop) {
