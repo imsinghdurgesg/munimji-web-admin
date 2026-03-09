@@ -27,7 +27,7 @@ export function CategoryList({ isOpen, onClose }: CategoryListProps) {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (_id: number) => {
     if (confirm('Are you sure you want to delete this category? Products in this category will not be deleted.')) {
       // TODO: Implement delete
       alert('Delete functionality coming soon!');
