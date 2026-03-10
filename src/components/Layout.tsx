@@ -1,9 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Store, Package, Settings, LogOut, LayoutDashboard, Menu, X } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import { Button } from './Button';
-import { cn } from '../utils/cn';
+import { LayoutDashboard, LogOut, Menu, Package, Settings, X } from 'lucide-react';
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { cn } from '../utils/cn';
+import { Button } from './Button';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,11 +32,7 @@ export function Layout({ children }: LayoutProps) {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="lg:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
               >
-                {isMobileMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
 
               <div className="w-10 h-10 bg-white rounded-lg border-2 border-primary-200 flex items-center justify-center overflow-hidden">
@@ -90,9 +86,7 @@ export function Layout({ children }: LayoutProps) {
                     to={item.href}
                     className={cn(
                       'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -121,9 +115,7 @@ export function Layout({ children }: LayoutProps) {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                      isActive ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'
                     )}
                   >
                     <Icon className="w-5 h-5" />
