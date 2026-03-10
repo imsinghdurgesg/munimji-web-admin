@@ -39,8 +39,8 @@ export function Layout({ children }: LayoutProps) {
                 )}
               </button>
 
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <Store className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-white rounded-lg border-2 border-primary-200 flex items-center justify-center overflow-hidden">
+                <img src="/icon.png" alt="Munimji" className="w-full h-full object-contain p-1" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg sm:text-xl font-bold text-gray-900">{shop?.name}</h1>
