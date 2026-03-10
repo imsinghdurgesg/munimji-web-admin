@@ -16,7 +16,12 @@ import type {
 
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
-  const baseURL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  let baseURL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  
+  // Ensure baseURL ends with /api
+  if (!baseURL.endsWith('/api')) {
+    baseURL = `${baseURL}/api`;
+  }
 
   const client = axios.create({
     baseURL,
