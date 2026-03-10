@@ -25,6 +25,7 @@ interface ProductState {
   updateProduct: (id: number, data: ProductFormData) => Promise<Product>;
   deleteProduct: (id: number) => Promise<void>;
   createCategory: (data: CategoryFormData) => Promise<Category>;
+  updateCategory: (id: number, data: CategoryFormData) => Promise<Category>;
   clearError: () => void;
 }
 
@@ -111,6 +112,20 @@ export const useProductStore = create<ProductState>((set) => ({
       return category;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create category';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  updateCategory: async (id: number, data: CategoryFormData) => {
+    try {
+      const category = await categoryApi.update(id, data);
+      set((state) => ({
+        categories: state.categories.map((c) => (c.id === id ? category : c)),
+      }));
+      return category;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update category';
       set({ error: errorMessage });
       throw error;
     }

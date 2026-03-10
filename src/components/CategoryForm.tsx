@@ -12,7 +12,7 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
-  const { createCategory } = useProductStore();
+  const { createCategory, updateCategory } = useProductStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -25,7 +25,13 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
     setIsLoading(true);
 
     try {
-      await createCategory(formData);
+      if (category) {
+        // Update existing category
+        await updateCategory(category.id, formData);
+      } else {
+        // Create new category
+        await createCategory(formData);
+      }
       onSuccess();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save category';
