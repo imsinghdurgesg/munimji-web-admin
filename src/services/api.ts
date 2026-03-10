@@ -3,21 +3,22 @@
  * Handles all backend API calls with authentication
  */
 
-import axios, { type AxiosInstance, type AxiosError } from 'axios';
+import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import type {
+  Category,
+  DashboardStats,
   LoginRequest,
   LoginResponse,
-  Shop,
   Product,
-  Category,
   ProductFormData,
-  DashboardStats,
+  Shop,
 } from '../types';
 
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
-  let baseURL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-  
+  let baseURL =
+    import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
   // Ensure baseURL ends with /api
   if (!baseURL.endsWith('/api')) {
     baseURL = `${baseURL}/api`;
@@ -115,7 +116,7 @@ export const shopApi = {
   },
 
   update: async (shopId: string, updates: Partial<Shop>): Promise<Shop> => {
-    const { data} = await apiClient.patch<Shop>(`/shops/${shopId}`, updates);
+    const { data } = await apiClient.patch<Shop>(`/shops/${shopId}`, updates);
     return data;
   },
 
@@ -132,6 +133,37 @@ export const shopApi = {
     }
   ): Promise<Shop> => {
     const { data } = await apiClient.patch<Shop>(`/shops/${shopId}/catalog/settings`, settings);
+    return data;
+  },
+
+  uploadLogo: async (
+    file: File
+  ): Promise<{
+    success: boolean;
+    logo: {
+      small: string;
+      medium: string;
+      large: string;
+      original: string;
+    };
+    originalName: string;
+    message: string;
+  }> => {
+    const shopId = getShopId();
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    const { data } = await apiClient.post(`/shops/${shopId}/upload-logo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  },
+
+  deleteLogo: async (): Promise<{ success: boolean; message: string }> => {
+    const shopId = getShopId();
+    const { data } = await apiClient.delete(`/shops/${shopId}/logo`);
     return data;
   },
 };
@@ -158,7 +190,9 @@ export const categoryApi = {
     return data;
   },
 
-  create: async (category: Omit<Category, 'id' | 'shopId' | 'createdAt' | 'updatedAt'>): Promise<Category> => {
+  create: async (
+    category: Omit<Category, 'id' | 'shopId' | 'createdAt' | 'updatedAt'>
+  ): Promise<Category> => {
     const shopId = getShopId();
     const { data } = await apiClient.post<Category>(`/shops/${shopId}/categories`, category);
     return data;
@@ -209,7 +243,9 @@ export const productApi = {
     await apiClient.delete(`/shops/${shopId}/products/${id}`);
   },
 
-  uploadImage: async (file: File): Promise<{
+  uploadImage: async (
+    file: File
+  ): Promise<{
     success: boolean;
     images: {
       thumbnail: string;
@@ -224,15 +260,11 @@ export const productApi = {
     const formData = new FormData();
     formData.append('image', file);
 
-    const { data } = await apiClient.post(
-      `/shops/${shopId}/products/upload-image`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    const { data } = await apiClient.post(`/shops/${shopId}/products/upload-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return data;
   },
 };
