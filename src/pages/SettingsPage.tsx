@@ -4,12 +4,15 @@ import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { shopApi } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { getImageUrl } from '../utils/image';
 
 export default function SettingsPage() {
   const { shop, refreshShop } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(shop?.catalogTheme?.logo || null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(
+    getImageUrl(shop?.catalogTheme?.logo) || null
+  );
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [formData, setFormData] = useState({
     name: shop?.name || '',
@@ -32,7 +35,7 @@ export default function SettingsPage() {
         whatsappNumber: shop.whatsappNumber || '',
         catalogEnabled: shop.catalogEnabled ?? false,
       });
-      setLogoPreview(shop.catalogTheme?.logo || null);
+      setLogoPreview(getImageUrl(shop.catalogTheme?.logo) || null);
     }
   }, [shop]);
 
@@ -62,7 +65,7 @@ export default function SettingsPage() {
 
   const removeLogo = () => {
     setLogoFile(null);
-    setLogoPreview(shop?.catalogTheme?.logo || null);
+    setLogoPreview(getImageUrl(shop?.catalogTheme?.logo) || null);
   };
 
   const handleDeleteLogo = async () => {
