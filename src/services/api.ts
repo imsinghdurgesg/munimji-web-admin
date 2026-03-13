@@ -20,6 +20,14 @@ const createApiClient = (): AxiosInstance => {
   let baseURL =
     import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+  // Log the API URL being used (helps debug deployment issues)
+  console.log('🌐 API Configuration:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    baseURL,
+    mode: import.meta.env.MODE,
+  });
+
   // Ensure baseURL ends with /api
   if (!baseURL.endsWith('/api')) {
     baseURL = `${baseURL}/api`;
