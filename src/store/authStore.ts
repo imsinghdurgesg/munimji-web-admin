@@ -66,9 +66,19 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.login(credentials);
 
+          console.log('🔧 Login response received:', {
+            hasUser: !!response.user,
+            hasShop: !!response.shop,
+            hasAccessToken: !!response.accessToken,
+            hasRefreshToken: !!response.refreshToken,
+          });
+
           // Don't store tokens - web admin uses httpOnly cookies for auth
           // Tokens are sent in response only for backward compatibility with electron app
           // Cookies are set by backend and sent automatically with requests
+
+          // Check if cookies are set
+          console.log('🔧 Cookies after login:', document.cookie);
 
           set({
             user: response.user,
@@ -77,8 +87,11 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+
+          console.log('🔧 Login successful, isAuthenticated:', true);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Login failed';
+          console.error('❌ Login failed:', errorMessage);
           set({
             error: errorMessage,
             isLoading: false,
@@ -115,8 +128,11 @@ export const useAuthStore = create<AuthState>()(
         // Check if user is marked as authenticated
         const isAuth = get().isAuthenticated;
 
+        console.log('🔧 initializeAuth called, isAuthenticated:', isAuth);
+
         if (!isAuth) {
           // Not authenticated, nothing to initialize
+          console.log('🔧 Not authenticated, skipping initialization');
           return;
         }
 
@@ -124,21 +140,21 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          // Fetch current user (cookies sent automatically)
-          const user = await authApi.me();
-
-          // Fetch shop data
-          const shop = await shopApi.getCurrent();
+          console.log('🔧 Fetching user and shop from /auth/me...');
+          // Fetch current user and shop (cookies sent automatically)
+          const response = await authApi.me();
+          console.log('🔧 Response:', response);
 
           set({
-            user,
-            shop,
+            user: response.user,
+            shop: response.shop,
             isAuthenticated: true,
             isLoading: false,
           });
+          console.log('🔧 Auth initialization successful');
         } catch (error) {
           // Auth failed (cookies expired or invalid)
-          console.error('Auth initialization failed:', error);
+          console.error('❌ Auth initialization failed:', error);
 
           // Clear auth state
           get().clearTokens();
