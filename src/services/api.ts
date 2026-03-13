@@ -39,17 +39,20 @@ const createApiClient = (): AxiosInstance => {
     headers: {
       'Content-Type': 'application/json',
     },
+    withCredentials: true, // Enable cookies for cross-origin requests
   });
 
-  // Request interceptor - Add Bearer token from memory
+  // Request interceptor - Support both cookie and Bearer token auth
   client.interceptors.request.use(
     (config) => {
       const token = useAuthStore.getState().getAccessToken();
-      
+
+      // Add Bearer token if available (for backward compatibility with electron app)
+      // Cookies will be sent automatically via withCredentials
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
+
       return config;
     },
     (error) => Promise.reject(error)
@@ -62,16 +65,17 @@ const createApiClient = (): AxiosInstance => {
       // Handle 401 Unauthorized - token expired
       if (error.response?.status === 401) {
         const refreshToken = useAuthStore.getState().getRefreshToken();
-        
-        if (refreshToken) {
-          try {
-            // Attempt to refresh tokens
-            const { data } = await axios.post(
-              `${baseURL}/auth/refresh`,
-              { refreshToken }
-            );
 
-            // Store new tokens (both access and refresh for token rotation)
+        // Try cookie-based refresh first (for web admin)
+        try {
+          const { data } = await axios.post(
+            `${baseURL}/auth/refresh`,
+            {},
+            { withCredentials: true } // Send cookies with refresh request
+          );
+
+          // If backend returns new tokens in response (Bearer token mode)
+          if (data.accessToken && data.refreshToken) {
             useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
 
             // Retry original request with new access token
@@ -79,16 +83,42 @@ const createApiClient = (): AxiosInstance => {
               error.config.headers.Authorization = `Bearer ${data.accessToken}`;
               return axios(error.config);
             }
-          } catch (refreshError) {
-            // Refresh failed, clear auth state and redirect to login
+          }
+
+          // If using cookie-based auth, just retry the original request
+          // (new cookie was set by backend)
+          if (error.config) {
+            return axios({
+              ...error.config,
+              withCredentials: true,
+            });
+          }
+        } catch (refreshError) {
+          // Cookie-based refresh failed, try Bearer token refresh if available
+          if (refreshToken) {
+            try {
+              const { data } = await axios.post(`${baseURL}/auth/refresh`, {
+                refreshToken,
+              });
+
+              useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
+
+              if (error.config) {
+                error.config.headers.Authorization = `Bearer ${data.accessToken}`;
+                return axios(error.config);
+              }
+            } catch (tokenRefreshError) {
+              // Both methods failed
+              useAuthStore.getState().clearTokens();
+              window.dispatchEvent(new CustomEvent('auth:logout'));
+              window.location.href = '/login';
+            }
+          } else {
+            // No refresh token and cookie refresh failed
             useAuthStore.getState().clearTokens();
             window.dispatchEvent(new CustomEvent('auth:logout'));
             window.location.href = '/login';
           }
-        } else {
-          // No refresh token available
-          window.dispatchEvent(new CustomEvent('auth:logout'));
-          window.location.href = '/login';
         }
       }
 
@@ -117,8 +147,13 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    // Backend doesn't need logout endpoint for Bearer tokens
-    // Just clear local tokens
+    try {
+      // Call backend logout to clear httpOnly cookies
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      // Ignore errors on logout - still clear local state
+      console.error('Logout request failed:', error);
+    }
   },
 };
 
