@@ -11,11 +11,21 @@ import { authApi, shopApi } from '../services/api';
 interface AuthState {
   user: User | null;
   shop: Shop | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+
+  // Internal token storage (NOT persisted to localStorage)
+  _internalTokens: {
+    accessToken: string | null;
+    refreshToken: string | null;
+  };
+
+  // Token getters and setters
+  getAccessToken: () => string | null;
+  getRefreshToken: () => string | null;
+  setTokens: (accessToken: string, refreshToken: string) => void;
+  clearTokens: () => void;
 
   // Actions
   login: (credentials: LoginRequest) => Promise<void>;
@@ -26,29 +36,41 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       shop: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      _internalTokens: { accessToken: null, refreshToken: null },
+
+      // Token management methods (not persisted)
+      getAccessToken: () => get()._internalTokens.accessToken,
+      getRefreshToken: () => get()._internalTokens.refreshToken,
+      
+      setTokens: (accessToken: string, refreshToken: string) => {
+        set({
+          _internalTokens: { accessToken, refreshToken },
+        });
+      },
+      
+      clearTokens: () => {
+        set({
+          _internalTokens: { accessToken: null, refreshToken: null },
+        });
+      },
 
       login: async (credentials: LoginRequest) => {
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login(credentials);
-
-          // Store tokens in localStorage
-          localStorage.setItem('accessToken', response.accessToken);
-          localStorage.setItem('refreshToken', response.refreshToken);
+          
+          // Store tokens in memory only (not persisted to localStorage)
+          get().setTokens(response.accessToken, response.refreshToken);
 
           set({
             user: response.user,
             shop: response.shop,
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -64,13 +86,12 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        authApi.logout();
+      logout: async () => {
+        await authApi.logout();
+        get().clearTokens();
         set({
           user: null,
           shop: null,
-          accessToken: null,
-          refreshToken: null,
           isAuthenticated: false,
           error: null,
         });
@@ -93,8 +114,6 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         shop: state.shop,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

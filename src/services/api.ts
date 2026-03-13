@@ -13,6 +13,7 @@ import type {
   ProductFormData,
   Shop,
 } from '../types';
+import { useAuthStore } from '../store/authStore';
 
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
@@ -32,13 +33,15 @@ const createApiClient = (): AxiosInstance => {
     },
   });
 
-  // Request interceptor to add auth token
+  // Request interceptor - Add Bearer token from memory
   client.interceptors.request.use(
     (config) => {
-      const token = localStorage.getItem('accessToken');
+      const token = useAuthStore.getState().getAccessToken();
+      
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      
       return config;
     },
     (error) => Promise.reject(error)
@@ -50,28 +53,33 @@ const createApiClient = (): AxiosInstance => {
     async (error: AxiosError<{ error?: string; message?: string }>) => {
       // Handle 401 Unauthorized - token expired
       if (error.response?.status === 401) {
-        // Try to refresh token
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = useAuthStore.getState().getRefreshToken();
+        
         if (refreshToken) {
           try {
-            const { data } = await axios.post(`${baseURL}/auth/refresh`, {
-              refreshToken,
-            });
-            localStorage.setItem('accessToken', data.accessToken);
+            // Attempt to refresh tokens
+            const { data } = await axios.post(
+              `${baseURL}/auth/refresh`,
+              { refreshToken }
+            );
 
-            // Retry original request with new token
+            // Store new tokens (both access and refresh for token rotation)
+            useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
+
+            // Retry original request with new access token
             if (error.config) {
               error.config.headers.Authorization = `Bearer ${data.accessToken}`;
               return axios(error.config);
             }
-          } catch {
-            // Refresh failed, logout user
-            localStorage.clear();
+          } catch (refreshError) {
+            // Refresh failed, clear auth state and redirect to login
+            useAuthStore.getState().clearTokens();
+            window.dispatchEvent(new CustomEvent('auth:logout'));
             window.location.href = '/login';
           }
         } else {
-          // No refresh token, logout
-          localStorage.clear();
+          // No refresh token available
+          window.dispatchEvent(new CustomEvent('auth:logout'));
           window.location.href = '/login';
         }
       }
@@ -101,7 +109,8 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    localStorage.clear();
+    // Backend doesn't need logout endpoint for Bearer tokens
+    // Just clear local tokens
   },
 };
 
