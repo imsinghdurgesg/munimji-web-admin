@@ -42,21 +42,8 @@ const createApiClient = (): AxiosInstance => {
     withCredentials: true, // Enable cookies for cross-origin requests
   });
 
-  // Request interceptor - Support both cookie and Bearer token auth
-  client.interceptors.request.use(
-    (config) => {
-      const token = useAuthStore.getState().getAccessToken();
-
-      // Add Bearer token if available (for backward compatibility with electron app)
-      // Cookies will be sent automatically via withCredentials
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+  // Cookies are sent automatically via withCredentials
+  // No need for request interceptor - backend uses httpOnly cookies
 
   // Response interceptor for error handling
   client.interceptors.response.use(
@@ -64,29 +51,16 @@ const createApiClient = (): AxiosInstance => {
     async (error: AxiosError<{ error?: string; message?: string }>) => {
       // Handle 401 Unauthorized - token expired
       if (error.response?.status === 401) {
-        const refreshToken = useAuthStore.getState().getRefreshToken();
-
-        // Try cookie-based refresh first (for web admin)
+        // Try cookie-based refresh (httpOnly cookies sent automatically)
         try {
-          const { data } = await axios.post(
+          await axios.post(
             `${baseURL}/auth/refresh`,
             {},
-            { withCredentials: true } // Send cookies with refresh request
+            { withCredentials: true } // Send httpOnly cookies with refresh request
           );
 
-          // If backend returns new tokens in response (Bearer token mode)
-          if (data.accessToken && data.refreshToken) {
-            useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
-
-            // Retry original request with new access token
-            if (error.config) {
-              error.config.headers.Authorization = `Bearer ${data.accessToken}`;
-              return axios(error.config);
-            }
-          }
-
-          // If using cookie-based auth, just retry the original request
-          // (new cookie was set by backend)
+          // Refresh succeeded, new cookies set by backend
+          // Retry the original request with new cookies
           if (error.config) {
             return axios({
               ...error.config,
@@ -94,31 +68,10 @@ const createApiClient = (): AxiosInstance => {
             });
           }
         } catch (refreshError) {
-          // Cookie-based refresh failed, try Bearer token refresh if available
-          if (refreshToken) {
-            try {
-              const { data } = await axios.post(`${baseURL}/auth/refresh`, {
-                refreshToken,
-              });
-
-              useAuthStore.getState().setTokens(data.accessToken, data.refreshToken);
-
-              if (error.config) {
-                error.config.headers.Authorization = `Bearer ${data.accessToken}`;
-                return axios(error.config);
-              }
-            } catch (tokenRefreshError) {
-              // Both methods failed
-              useAuthStore.getState().clearTokens();
-              window.dispatchEvent(new CustomEvent('auth:logout'));
-              window.location.href = '/login';
-            }
-          } else {
-            // No refresh token and cookie refresh failed
-            useAuthStore.getState().clearTokens();
-            window.dispatchEvent(new CustomEvent('auth:logout'));
-            window.location.href = '/login';
-          }
+          // Refresh failed - cookies expired or invalid
+          useAuthStore.getState().clearTokens();
+          window.dispatchEvent(new CustomEvent('auth:logout'));
+          window.location.href = '/login';
         }
       }
 
@@ -154,6 +107,11 @@ export const authApi = {
       // Ignore errors on logout - still clear local state
       console.error('Logout request failed:', error);
     }
+  },
+
+  me: async (): Promise<any> => {
+    const { data } = await apiClient.get('/auth/me');
+    return data;
   },
 };
 
@@ -221,13 +179,12 @@ export const shopApi = {
 };
 
 /**
- * Helper to get shopId from auth storage
+ * Helper to get shopId from auth store (in-memory, not localStorage)
  */
 const getShopId = (): string => {
-  const authStorage = localStorage.getItem('auth-storage');
-  if (authStorage) {
-    const parsed = JSON.parse(authStorage);
-    return parsed.state?.shop?.id;
+  const shop = useAuthStore.getState().shop;
+  if (shop?.id) {
+    return shop.id;
   }
   throw new Error('Shop ID not found. Please login again.');
 };

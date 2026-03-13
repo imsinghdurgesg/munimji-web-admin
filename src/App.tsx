@@ -10,7 +10,14 @@ import { useAuthStore } from './store/authStore';
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
   const logout = useAuthStore((state) => state.logout);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  // Initialize auth on mount (fetch user/shop if authenticated)
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   // Listen for auth logout events (e.g., from token refresh failure)
   useEffect(() => {
@@ -21,6 +28,18 @@ function App() {
     window.addEventListener('auth:logout', handleLogout);
     return () => window.removeEventListener('auth:logout', handleLogout);
   }, [logout]);
+
+  // Show loading screen while fetching user data
+  if (isAuthenticated && isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>

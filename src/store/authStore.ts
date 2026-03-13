@@ -32,6 +32,7 @@ interface AuthState {
   logout: () => void;
   refreshShop: () => Promise<void>;
   clearError: () => void;
+  initializeAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -64,9 +65,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login(credentials);
-          
-          // Store tokens in memory only (not persisted to localStorage)
-          get().setTokens(response.accessToken, response.refreshToken);
+
+          // Don't store tokens - web admin uses httpOnly cookies for auth
+          // Tokens are sent in response only for backward compatibility with electron app
+          // Cookies are set by backend and sent automatically with requests
 
           set({
             user: response.user,
@@ -108,12 +110,52 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearError: () => set({ error: null }),
+
+      initializeAuth: async () => {
+        // Check if user is marked as authenticated
+        const isAuth = get().isAuthenticated;
+
+        if (!isAuth) {
+          // Not authenticated, nothing to initialize
+          return;
+        }
+
+        // User is authenticated, fetch user/shop data from API using cookies
+        try {
+          set({ isLoading: true });
+
+          // Fetch current user (cookies sent automatically)
+          const user = await authApi.me();
+
+          // Fetch shop data
+          const shop = await shopApi.getCurrent();
+
+          set({
+            user,
+            shop,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
+          // Auth failed (cookies expired or invalid)
+          console.error('Auth initialization failed:', error);
+
+          // Clear auth state
+          get().clearTokens();
+          set({
+            user: null,
+            shop: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      },
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({
-        user: state.user,
-        shop: state.shop,
+        // Only persist isAuthenticated flag (no sensitive data)
+        // User and shop are fetched from API on mount using httpOnly cookies
         isAuthenticated: state.isAuthenticated,
       }),
     }
