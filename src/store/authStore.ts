@@ -152,27 +152,37 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           console.log('🔧 Auth initialization successful');
-        } catch (error) {
+        } catch (error: any) {
           // Auth failed (cookies expired or invalid)
           console.error('❌ Auth initialization failed:', error);
 
-          // Clear auth state
-          get().clearTokens();
-          set({
-            user: null,
-            shop: null,
-            isAuthenticated: false,
-            isLoading: false,
-          });
+          // Only clear auth if it's a 401 (unauthorized)
+          // For other errors (network, etc.), keep user logged in with cached data
+          if (error.response?.status === 401) {
+            console.log('🔧 401 Unauthorized - clearing auth state');
+            get().clearTokens();
+            set({
+              user: null,
+              shop: null,
+              isAuthenticated: false,
+              isLoading: false,
+            });
+          } else {
+            // Network error or other issue - keep cached data
+            console.log('🔧 Non-401 error - keeping cached auth data');
+            set({ isLoading: false });
+          }
         }
       },
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({
-        // Only persist isAuthenticated flag (no sensitive data)
-        // User and shop are fetched from API on mount using httpOnly cookies
+        // Persist auth state for faster page loads
+        // Data will be refreshed from API if stale
         isAuthenticated: state.isAuthenticated,
+        user: state.user,
+        shop: state.shop,
       }),
     }
   )

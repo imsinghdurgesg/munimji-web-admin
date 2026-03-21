@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Menu, Package, Settings, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, MessageCircle, Package, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -17,6 +17,7 @@ export function Layout({ children }: LayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
+    { name: 'WhatsApp Setup', href: '/whatsapp-setup', icon: MessageCircle },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

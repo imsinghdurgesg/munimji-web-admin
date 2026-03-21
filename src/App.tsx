@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
 import SettingsPage from './pages/SettingsPage';
+import WhatsAppSetupPage from './pages/WhatsAppSetupPage';
 import { useAuthStore } from './store/authStore';
 
 function App() {
@@ -15,8 +16,14 @@ function App() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
   // Initialize auth on mount (fetch user/shop if authenticated)
+  // Only run if we don't already have user data (prevents double fetch after login)
   useEffect(() => {
-    initializeAuth();
+    const { user, shop, isAuthenticated: isAuth } = useAuthStore.getState();
+
+    // Only initialize if authenticated but missing user/shop data
+    if (isAuth && (!user || !shop)) {
+      initializeAuth();
+    }
   }, [initializeAuth]);
 
   // Listen for auth logout events (e.g., from token refresh failure)
@@ -79,6 +86,17 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <SettingsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/whatsapp-setup"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <WhatsAppSetupPage />
               </Layout>
             </ProtectedRoute>
           }

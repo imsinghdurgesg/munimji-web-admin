@@ -117,3 +117,75 @@ export interface DashboardStats {
   pendingOrders: number;
   totalRevenue: number;
 }
+
+// WhatsApp Business API Types
+export type WhatsAppSetupStatus = 'PENDING' | 'PROCESSING' | 'APPROVED' | 'REJECTED' | 'FAILED';
+
+export type BusinessCategory =
+  | 'RETAIL'
+  | 'GROCERY'
+  | 'ELECTRONICS'
+  | 'FASHION'
+  | 'PHARMACY'
+  | 'RESTAURANT'
+  | 'SERVICES'
+  | 'OTHER';
+
+export interface WhatsAppSetupRequest {
+  id: number;
+  shopId: string;
+  businessName: string;
+  businessAddress: string;
+  gstNumber?: string;
+  panNumber?: string;
+  phoneNumber: string;
+  ownerName: string;
+  ownerEmail: string;
+  businessCategory: BusinessCategory;
+  businessDescription?: string;
+  gstCertificateUrl?: string;
+  shopPhotoUrl?: string;
+  status: WhatsAppSetupStatus;
+  statusMessage?: string;
+  submittedAt: string;
+  processedAt?: string;
+  approvedAt?: string;
+  assignedToUser?: string;
+  shop?: {
+    id: string;
+    name: string;
+    catalogSlug?: string;
+  };
+}
+
+export interface WhatsAppSetupFormData {
+  businessName: string;
+  businessAddress: string;
+  gstNumber?: string;
+  panNumber?: string;
+  phoneNumber: string;
+  ownerName: string;
+  ownerEmail: string;
+  businessCategory: BusinessCategory;
+  businessDescription?: string;
+  gstCertificateUrl?: string;
+  shopPhotoUrl?: string;
+}
+
+export interface WhatsAppSetupStatusResponse {
+  success: boolean;
+  setupRequest: WhatsAppSetupRequest | null;
+  shop: {
+    whatsappEnabled: boolean;
+    whatsappVerified: boolean;
+    setupDate: string | null;
+  };
+}
+
+export interface CompleteSetupRequest {
+  metaBusinessId: string;
+  whatsappPhoneNumberId: string;
+  whatsappAccessToken: string;
+  whatsappBusinessAccountId: string;
+  statusMessage?: string;
+}
