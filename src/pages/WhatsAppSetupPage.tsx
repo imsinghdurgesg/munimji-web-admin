@@ -35,9 +35,9 @@ const businessCategories: { label: string; value: BusinessCategory }[] = [
   { label: 'Other', value: 'OTHER' },
 ];
 
-const statusSeverity: Record<WhatsAppSetupStatus, 'success' | 'info' | 'warn' | 'danger'> = {
+const statusSeverity: Record<WhatsAppSetupStatus, 'success' | 'info' | 'warning' | 'danger'> = {
   PENDING: 'info',
-  PROCESSING: 'warn',
+  PROCESSING: 'warning',
   APPROVED: 'success',
   REJECTED: 'danger',
   FAILED: 'danger',
@@ -200,6 +200,7 @@ export default function WhatsAppSetupPage() {
                 severity="danger"
                 outlined
                 onClick={async () => {
+                  if (!shop?.id) return;
                   if (confirm('Are you sure you want to disable WhatsApp Business API?')) {
                     try {
                       await whatsappApi.disable(shop.id);
