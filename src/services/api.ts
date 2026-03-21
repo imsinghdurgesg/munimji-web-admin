@@ -50,28 +50,52 @@ const createApiClient = (): AxiosInstance => {
     (response) => response,
     async (error: AxiosError<{ error?: string; message?: string }>) => {
       // Handle 401 Unauthorized - token expired
-      if (error.response?.status === 401) {
+      const originalRequest = error.config as any;
+
+      if (error.response?.status === 401 && originalRequest) {
+        // Don't retry if this is already a refresh request (prevent infinite loop)
+        if (originalRequest.url?.includes('/auth/refresh')) {
+          console.log('🔧 Refresh endpoint failed, logging out...');
+          useAuthStore.getState().clearTokens();
+          window.dispatchEvent(new CustomEvent('auth:logout'));
+          window.location.href = '/login';
+          return Promise.reject(error);
+        }
+
+        // Don't retry if we've already tried once (prevent infinite loop)
+        if (originalRequest._retry) {
+          console.log('🔧 Already retried, logging out...');
+          useAuthStore.getState().clearTokens();
+          window.dispatchEvent(new CustomEvent('auth:logout'));
+          window.location.href = '/login';
+          return Promise.reject(error);
+        }
+
+        originalRequest._retry = true;
+
         // Try cookie-based refresh (httpOnly cookies sent automatically)
         try {
+          console.log('🔧 Attempting token refresh...');
           await axios.post(
             `${baseURL}/auth/refresh`,
             {},
             { withCredentials: true } // Send httpOnly cookies with refresh request
           );
 
+          console.log('🔧 Refresh succeeded, retrying original request...');
           // Refresh succeeded, new cookies set by backend
           // Retry the original request with new cookies
-          if (error.config) {
-            return axios({
-              ...error.config,
-              withCredentials: true,
-            });
-          }
+          return axios({
+            ...originalRequest,
+            withCredentials: true,
+          });
         } catch (refreshError) {
           // Refresh failed - cookies expired or invalid
+          console.log('🔧 Refresh failed, logging out...');
           useAuthStore.getState().clearTokens();
           window.dispatchEvent(new CustomEvent('auth:logout'));
           window.location.href = '/login';
+          return Promise.reject(refreshError);
         }
       }
 
@@ -284,6 +308,33 @@ export const productApi = {
 export const dashboardApi = {
   getStats: async (): Promise<DashboardStats> => {
     const { data } = await apiClient.get<DashboardStats>('/dashboard/stats');
+    return data;
+  },
+};
+
+/**
+ * WhatsApp API
+ */
+export const whatsappApi = {
+  getStatus: async (shopId: string) => {
+    const { data } = await apiClient.get(`/shops/${shopId}/whatsapp/status`);
+    return data;
+  },
+
+  submitSetupRequest: async (shopId: string, formData: any) => {
+    const { data } = await apiClient.post(`/shops/${shopId}/whatsapp/request-setup`, formData);
+    return data;
+  },
+
+  uploadDocuments: async (shopId: string, files: FormData) => {
+    const { data } = await apiClient.post(`/shops/${shopId}/whatsapp/upload-docs`, files, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  disable: async (shopId: string) => {
+    const { data } = await apiClient.delete(`/shops/${shopId}/whatsapp/setup`);
     return data;
   },
 };

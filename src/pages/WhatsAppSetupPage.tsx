@@ -21,7 +21,7 @@ import type {
   WhatsAppSetupStatusResponse,
   WhatsAppSetupStatus
 } from '../types';
-import { api } from '../services/api';
+import { whatsappApi } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
 const businessCategories: { label: string; value: BusinessCategory }[] = [
@@ -75,10 +75,8 @@ export default function WhatsAppSetupPage() {
 
     try {
       setStatusLoading(true);
-      const response = await api.get<WhatsAppSetupStatusResponse>(
-        `/shops/${shop.id}/whatsapp/status`
-      );
-      setCurrentStatus(response.data);
+      const response = await whatsappApi.getStatus(shop.id);
+      setCurrentStatus(response);
     } catch (err) {
       console.error('Failed to load WhatsApp status:', err);
     } finally {
@@ -103,19 +101,13 @@ export default function WhatsAppSetupPage() {
         formData.append('shopPhoto', files[0]);
       }
 
-      const response = await api.post<{ success: boolean; gstCertificateUrl?: string; shopPhotoUrl?: string }>(
-        `/shops/${shop.id}/whatsapp/upload-docs`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
-      );
+      const response = await whatsappApi.uploadDocuments(shop.id, formData);
 
-      if (response.data.success) {
-        if (field === 'gstCertificateUrl' && response.data.gstCertificateUrl) {
-          setFormData((prev) => ({ ...prev, gstCertificateUrl: response.data.gstCertificateUrl! }));
-        } else if (field === 'shopPhotoUrl' && response.data.shopPhotoUrl) {
-          setFormData((prev) => ({ ...prev, shopPhotoUrl: response.data.shopPhotoUrl! }));
+      if (response.success) {
+        if (field === 'gstCertificateUrl' && response.gstCertificateUrl) {
+          setFormData((prev) => ({ ...prev, gstCertificateUrl: response.gstCertificateUrl! }));
+        } else if (field === 'shopPhotoUrl' && response.shopPhotoUrl) {
+          setFormData((prev) => ({ ...prev, shopPhotoUrl: response.shopPhotoUrl! }));
         }
       }
     } catch (err) {
@@ -133,7 +125,7 @@ export default function WhatsAppSetupPage() {
     setSuccess(false);
 
     try {
-      await api.post(`/shops/${shop.id}/whatsapp/request-setup`, formData);
+      await whatsappApi.submitSetupRequest(shop.id, formData);
       setSuccess(true);
       await loadStatus(); // Reload status
     } catch (err: any) {
@@ -210,7 +202,7 @@ export default function WhatsAppSetupPage() {
                 onClick={async () => {
                   if (confirm('Are you sure you want to disable WhatsApp Business API?')) {
                     try {
-                      await api.delete(`/shops/${shop.id}/whatsapp/setup`);
+                      await whatsappApi.disable(shop.id);
                       await loadStatus();
                     } catch (err) {
                       console.error('Failed to disable WhatsApp:', err);

@@ -16,8 +16,14 @@ function App() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
 
   // Initialize auth on mount (fetch user/shop if authenticated)
+  // Only run if we don't already have user data (prevents double fetch after login)
   useEffect(() => {
-    initializeAuth();
+    const { user, shop, isAuthenticated: isAuth } = useAuthStore.getState();
+
+    // Only initialize if authenticated but missing user/shop data
+    if (isAuth && (!user || !shop)) {
+      initializeAuth();
+    }
   }, [initializeAuth]);
 
   // Listen for auth logout events (e.g., from token refresh failure)
