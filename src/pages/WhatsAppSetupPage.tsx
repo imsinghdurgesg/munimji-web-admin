@@ -158,13 +158,13 @@ export default function WhatsAppSetupPage() {
         )}
 
         <Card title="Setup Request Status" className="mb-4">
-          <div className="grid">
-            <div className="col-12 md:col-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="">
               <p><strong>Business Name:</strong> {request.businessName}</p>
               <p><strong>Phone Number:</strong> {request.phoneNumber}</p>
               <p><strong>Category:</strong> {request.businessCategory}</p>
             </div>
-            <div className="col-12 md:col-6">
+            <div className="">
               <p><strong>Submitted:</strong> {new Date(request.submittedAt).toLocaleDateString()}</p>
               <p><strong>Status:</strong> <Tag value={request.status} severity={statusSeverity[request.status]} /></p>
               {request.statusMessage && <p><strong>Message:</strong> {request.statusMessage}</p>}
@@ -234,8 +234,8 @@ export default function WhatsAppSetupPage() {
 
       <form onSubmit={handleSubmit}>
         <Card title="Business Information">
-          <div className="grid p-fluid">
-            <div className="col-12 md:col-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="">
               <label htmlFor="businessName" className="block mb-2 font-semibold">Business Name *</label>
               <InputText
                 id="businessName"
@@ -245,7 +245,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label htmlFor="businessCategory" className="block mb-2 font-semibold">Business Category *</label>
               <Dropdown
                 id="businessCategory"
@@ -256,7 +256,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-span-2">
               <label htmlFor="businessAddress" className="block mb-2 font-semibold">Business Address *</label>
               <InputTextarea
                 id="businessAddress"
@@ -267,7 +267,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12">
+            <div className="col-span-2">
               <label htmlFor="businessDescription" className="block mb-2 font-semibold">Business Description (Optional)</label>
               <InputTextarea
                 id="businessDescription"
@@ -283,8 +283,8 @@ export default function WhatsAppSetupPage() {
         <Divider />
 
         <Card title="Tax Information" className="mt-4">
-          <div className="grid p-fluid">
-            <div className="col-12 md:col-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="">
               <label htmlFor="gstNumber" className="block mb-2 font-semibold">GST Number (Optional)</label>
               <InputText
                 id="gstNumber"
@@ -294,7 +294,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label htmlFor="panNumber" className="block mb-2 font-semibold">PAN Number (Optional)</label>
               <InputText
                 id="panNumber"
@@ -304,7 +304,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label className="block mb-2 font-semibold">GST Certificate (Optional)</label>
               <FileUpload
                 mode="basic"
@@ -320,7 +320,7 @@ export default function WhatsAppSetupPage() {
               )}
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label className="block mb-2 font-semibold">Shop Photo (Optional)</label>
               <FileUpload
                 mode="basic"
@@ -341,8 +341,8 @@ export default function WhatsAppSetupPage() {
         <Divider />
 
         <Card title="Contact Information" className="mt-4">
-          <div className="grid p-fluid">
-            <div className="col-12 md:col-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="">
               <label htmlFor="ownerName" className="block mb-2 font-semibold">Owner Name *</label>
               <InputText
                 id="ownerName"
@@ -352,7 +352,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label htmlFor="ownerEmail" className="block mb-2 font-semibold">Owner Email *</label>
               <InputText
                 id="ownerEmail"
@@ -363,7 +363,7 @@ export default function WhatsAppSetupPage() {
               />
             </div>
 
-            <div className="col-12 md:col-6">
+            <div className="">
               <label htmlFor="phoneNumber" className="block mb-2 font-semibold">WhatsApp Phone Number *</label>
               <InputText
                 id="phoneNumber"
