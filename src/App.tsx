@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
 import SettingsPage from './pages/SettingsPage';
+import WhatsAppSetupPage from './pages/WhatsAppSetupPage';
 import { useAuthStore } from './store/authStore';
 
 function App() {
@@ -79,6 +80,17 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <SettingsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/whatsapp-setup"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <WhatsAppSetupPage />
               </Layout>
             </ProtectedRoute>
           }
