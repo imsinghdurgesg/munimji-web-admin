@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import ProductsPage from './pages/ProductsPage';
 import SettingsPage from './pages/SettingsPage';
 import WhatsAppSetupPage from './pages/WhatsAppSetupPage';
+import InternalWhatsAppQueuePage from './pages/InternalWhatsAppQueuePage';
 import { useAuthStore } from './store/authStore';
 
 function App() {
@@ -97,6 +98,17 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <WhatsAppSetupPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/internal/whatsapp-queue"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <InternalWhatsAppQueuePage />
               </Layout>
             </ProtectedRoute>
           }

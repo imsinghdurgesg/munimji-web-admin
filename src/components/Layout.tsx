@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, Menu, MessageCircle, Package, Settings, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, MessageCircle, Package, Settings, X, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -14,12 +14,21 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navigation = [
+  // Build navigation based on user role
+  const baseNavigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'WhatsApp Setup', href: '/whatsapp-setup', icon: MessageCircle },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
+
+  // Add internal admin routes for SUPER_ADMIN
+  const navigation = user?.role === 'SUPER_ADMIN'
+    ? [
+        ...baseNavigation,
+        { name: 'WhatsApp Queue', href: '/internal/whatsapp-queue', icon: Shield },
+      ]
+    : baseNavigation;
 
   return (
     <div className="min-h-screen bg-gray-50">

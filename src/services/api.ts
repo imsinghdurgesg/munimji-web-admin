@@ -339,4 +339,36 @@ export const whatsappApi = {
   },
 };
 
+/**
+ * Internal Admin API (SUPER_ADMIN only)
+ */
+export const internalApi = {
+  getWhatsAppQueue: async (status?: string) => {
+    const { data } = await apiClient.get('/internal/whatsapp-setup/queue', {
+      params: status ? { status } : {},
+    });
+    return data;
+  },
+
+  updateRequestStatus: async (requestId: number, updates: {
+    status: string;
+    statusMessage?: string;
+    assignedToUser?: string;
+  }) => {
+    const { data } = await apiClient.patch(`/internal/whatsapp-setup/${requestId}/status`, updates);
+    return data;
+  },
+
+  completeSetup: async (requestId: number, credentials: {
+    metaBusinessId: string;
+    whatsappPhoneNumberId: string;
+    whatsappAccessToken: string;
+    whatsappBusinessAccountId: string;
+    statusMessage?: string;
+  }) => {
+    const { data } = await apiClient.post(`/internal/whatsapp-setup/${requestId}/complete`, credentials);
+    return data;
+  },
+};
+
 export { apiClient };

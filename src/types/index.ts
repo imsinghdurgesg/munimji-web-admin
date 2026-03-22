@@ -12,7 +12,7 @@ export interface User {
   shopId: string;
   username: string;
   fullName: string;
-  role: 'ADMIN' | 'USER';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'USER';
   createdAt: string;
   updatedAt: string;
 }
